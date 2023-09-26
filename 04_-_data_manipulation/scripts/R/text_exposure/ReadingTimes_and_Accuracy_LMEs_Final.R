@@ -16,89 +16,99 @@ data_path <- here::here("04_-_data_manipulation","data", "raw_data", "text_expos
 figs_path <- here::here("04_-_data_manipulation", "output")
 
 # Read in the files
-accuracy <- readr::read.csv(file = file.path(data_path,'Cleaned_211_All_accuracy.csv'))
-data <- readr::read.csv(file = file.path(data_path, 'Cleaned_211_Correct.csv'))
+accuracy <- readr::read_csv(file = file.path(data_path,'Cleaned_211_All_accuracy.csv'))
+data <- readr::read_csv(file = file.path(data_path, 'Cleaned_211_Correct.csv'))
+
+# Rename the data column name and change variable types
+data <- data |>
+    janitor::clean_names()
+
+accuracy <- accuracy |>
+    janitor::clean_names()
 
 # scale the scores and change the variable type to numeric
-data$art_z <- as.numeric(scale(data$ART_score_value))
-data$re_z <- as.numeric(scale(data$RE_Score))
+data$art_z <- as.numeric(scale(data$art_score_value))
+data$re_z <- as.numeric(scale(data$re_score))
 
-accuracy$art_z <- as.numeric(scale(accuracy$ART_score_value))
-accuracy$re_z <- as.numeric(scale(accuracy$RE_Score))
+accuracy$art_z <- as.numeric(scale(accuracy$art_score_value))
+accuracy$re_z <- as.numeric(scale(accuracy$re_score))
 
 #code the comparison contrasts by assigning dummy coding
 data$easy_hard <- as.numeric(with(data,
-                                  ifelse(SentenceType == "Active" | SentenceType == "Passive",
+                                  ifelse(sentence_type == "Active" | SentenceType == "Passive",
                                          "-1",
                                          "1")))
 data$easy <- as.numeric(with(data,
-                             ifelse(SentenceType == "Active", "-1",
-                                    ifelse(SentenceType == "Passive", "1",
+                             ifelse(sentence_type == "Active", "-1",
+                                    ifelse(sentence_type == "Passive", "1",
                                            "0"))))
 data$hard <-as.numeric(with(data,
-                           ifelse(SentenceType == "SRC", "-1",
-                                  ifelse(SentenceType == "ORC", "1",
+                           ifelse(sentence_type == "SRC", "-1",
+                                  ifelse(sentence_type == "ORC", "1",
                                          "0"))))
 
 data$linear_trend <-as.numeric(with(data,
-                                   ifelse(SentenceType == "Active", "-3",
-                                          ifelse(SentenceType == "Passive", "-1",
-                                                 ifelse(SentenceType == "SRC", "1",
+                                   ifelse(sentence_type == "Active", "-3",
+                                          ifelse(sentence_type == "Passive", "-1",
+                                                 ifelse(sentence_type == "SRC", "1",
                                                         "3")))))
 
 
 accuracy$easy_hard <-
     as.numeric(with(accuracy,
-                    ifelse(SentenceType == "Active" | SentenceType == "Passive",
+                    ifelse(sentence_type == "Active" | sentence_type == "Passive",
                            "-1",
                            "1")))
 accuracy$easy <-
     as.numeric(with(accuracy,
-                    ifelse(SentenceType == "Acive", "-1",
-                           ifelse(SentenceType=="Passive", "1",
+                    ifelse(sentence_type == "Acive", "-1",
+                           ifelse(sentence_type=="Passive", "1",
                                   "0"))))
 accuracy$hard <- as.numeric(with(accuracy,
-                                 ifelse(SentenceType == "SRC", "-1",
-                                        ifelse(SentenceType == "ORC", "1",
+                                 ifelse(sentence_type == "SRC", "-1",
+                                        ifelse(sentence_type == "ORC", "1",
                                                "0"))))
 accuracy$linear_trend <-
     as.numeric(with(accuracy,
-                    ifelse(SentenceType=="Active", "-3",
-                           ifelse(SentenceType=="Passive", "-1",
-                                  ifelse(SentenceType=="SRC", "1",
+                    ifelse(sentence_type == "Active", "-3",
+                           ifelse(sentence_type == "Passive", "-1",
+                                  ifelse(sentence_type =="SRC", "1",
                                          "3")))))
-
-
 
 
 #code exploratory treatment contrast with Active sentences set as a baseline
 
-data$Condition<-as.factor(with(data, ifelse(SentenceType=="Active", "1",
-                                            ifelse(SentenceType=="Passive", "2",
-                                                   ifelse(SentenceType=="SRC", "3", "4")))))
+data$condition <- as.factor(with(data,
+                                 ifelse(sentence_type == "Active", "1",
+                                        ifelse(sentence_type == "Passive", "2",
+                                               ifelse(sentence_type =="SRC", "3",
+                                                      "4")))))
 
-accuracy$Condition<-as.factor(with(accuracy, ifelse(SentenceType=="Active", "1",
-                                            ifelse(SentenceType=="Passive", "2",
-                                                   ifelse(SentenceType=="SRC", "3", "4")))))
+accuracy$condition <-
+    as.factor(with(accuracy,
+                   ifelse(sentence_type == "Active", "1",
+                          ifelse(sentence_type == "Passive", "2",
+                                 ifelse(sentence_type == "SRC", "3",
+                                        "4")))))
 
 
-data$SentenceType<-as.factor(data$SentenceType)
-accuracy$SentenceType<-as.factor(accuracy$SentenceType)
+data$sentence_type <- as.factor(data$sentence_type)
+accuracy$sentence_type <- as.factor(accuracy$sentence_type)
 
 
 
 
 #Response time raw and log transformed vs ART and RE in separate models
 
-ART_Orthogonal = glmer(ReadingTime_ms ~Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_Orthogonal)
-ART_Orthogonal_Log = lmer(Reading_Time_Log ~SES_factor+ Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_Orthogonal_Log)
+art_orthogonal <- glmer(ReadingTime_ms ~ easy_hard * art_z + easy*ART_z+ hard * art_z + (1 | ItemType) + (1 | ParticipantCode), data = data)
+summary(art_orthogonal)
+art_orthogonal_log <- lmer(Reading_Time_Log ~SES_factor+ Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = data)
+summary(art_orthogonal_log)
 
 
-RE_Orthogonal = lmer(ReadingTime_ms ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
+RE_Orthogonal <- lmer(ReadingTime_ms ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
 summary(RE_Orthogonal)
-RE_Orthogonal_Log = lmer(Reading_Time_Log ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
+RE_Orthogonal_Log <- lmer(Reading_Time_Log ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
 summary(RE_Orthogonal_Log)
 
 
