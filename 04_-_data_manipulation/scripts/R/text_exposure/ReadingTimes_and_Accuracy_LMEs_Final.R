@@ -9,7 +9,7 @@ library(here)
 ### Path variables ----
 here_path <- here::here() # Just using here for finding root path directories. It follows additional heuristics
 
-# Some of the subdirectories
+### Some of the subdirectories
 code_path <- here::here("04_-_data_manipulation", "scripts", "R", "text_exposure") # Using the base R function file.path
 docs_path <- here::here("04_-_data_manipulation", "doc", "text_exposure")
 data_path <- here::here("04_-_data_manipulation","data", "raw_data", "text_exposure")
@@ -19,7 +19,7 @@ figs_path <- here::here("04_-_data_manipulation", "output")
 accuracy <- readr::read.csv(file = file.path(data_path,'Cleaned_211_All_accuracy.csv'))
 data <- readr::read.csv(file = file.path(data_path, 'Cleaned_211_Correct.csv'))
 
-
+# scale the scores and change the variable type to numeric
 data$art_z <- as.numeric(scale(data$ART_score_value))
 data$re_z <- as.numeric(scale(data$RE_Score))
 
@@ -27,37 +27,46 @@ accuracy$art_z <- as.numeric(scale(accuracy$ART_score_value))
 accuracy$re_z <- as.numeric(scale(accuracy$RE_Score))
 
 #code the comparison contrasts by assigning dummy coding
-# easy vs hard sentences
 data$easy_hard <- as.numeric(with(data,
-                                  ifelse(SentenceType=="Active" |SentenceType=="Passive",
+                                  ifelse(SentenceType == "Active" | SentenceType == "Passive",
                                          "-1",
                                          "1")))
 data$easy <- as.numeric(with(data,
-                             ifelse(SentenceType=="Active", "-1",
-                                    ifelse(SentenceType=="Passive", "1",
+                             ifelse(SentenceType == "Active", "-1",
+                                    ifelse(SentenceType == "Passive", "1",
                                            "0"))))
-data$hard<-as.numeric(with(data,
-                           ifelse(SentenceType=="SRC", "-1",
-                                  ifelse(SentenceType=="ORC", "1",
+data$hard <-as.numeric(with(data,
+                           ifelse(SentenceType == "SRC", "-1",
+                                  ifelse(SentenceType == "ORC", "1",
                                          "0"))))
 
-data$linear_trend<-as.numeric(with(data,
-                                   ifelse(SentenceType=="Active", "-3",
-                                          ifelse(SentenceType=="Passive", "-1",
-                                                 ifelse(SentenceType=="SRC", "1",
+data$linear_trend <-as.numeric(with(data,
+                                   ifelse(SentenceType == "Active", "-3",
+                                          ifelse(SentenceType == "Passive", "-1",
+                                                 ifelse(SentenceType == "SRC", "1",
                                                         "3")))))
 
 
-accuracy$easy_hard <- as.numeric(with(accuracy, ifelse(SentenceType=="Active" |SentenceType=="Passive", "-1", "1")))
-accuracy$easy <- as.numeric(with(accuracy, ifelse(SentenceType=="Acive", "-1",
-                                        ifelse(SentenceType=="Passive", "1", "0"))))
-accuracy$hard <- as.numeric(with(accuracy, ifelse(SentenceType=="SRC", "-1",
-                                        ifelse(SentenceType=="ORC", "1", "0"))))
-accuracy$linear_trend <- as.numeric(with(accuracy,
-                                         ifelse(SentenceType=="Active", "-3",
-                                               ifelse(SentenceType=="Passive", "-1",
-                                                      ifelse(SentenceType=="SRC", "1",
-                                                             "3")))))
+accuracy$easy_hard <-
+    as.numeric(with(accuracy,
+                    ifelse(SentenceType == "Active" | SentenceType == "Passive",
+                           "-1",
+                           "1")))
+accuracy$easy <-
+    as.numeric(with(accuracy,
+                    ifelse(SentenceType == "Acive", "-1",
+                           ifelse(SentenceType=="Passive", "1",
+                                  "0"))))
+accuracy$hard <- as.numeric(with(accuracy,
+                                 ifelse(SentenceType == "SRC", "-1",
+                                        ifelse(SentenceType == "ORC", "1",
+                                               "0"))))
+accuracy$linear_trend <-
+    as.numeric(with(accuracy,
+                    ifelse(SentenceType=="Active", "-3",
+                           ifelse(SentenceType=="Passive", "-1",
+                                  ifelse(SentenceType=="SRC", "1",
+                                         "3")))))
 
 
 
