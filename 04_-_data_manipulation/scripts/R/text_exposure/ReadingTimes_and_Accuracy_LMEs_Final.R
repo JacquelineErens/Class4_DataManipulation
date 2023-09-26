@@ -1,10 +1,23 @@
+
+# load packages
 library(tidyverse)
 library(lme4)
 library(coda)
+library(here)
 
+# set directory
+### Path variables ----
+here_path <- here::here() # Just using here for finding root path directories. It follows additional heuristics
 
-accuracy<-read.csv('Cleaned_211_All_accuracy.csv')
-data<-read.csv('Cleaned_211_Correct.csv')
+# Some of the subdirectories
+code_path <- here::here("04_-_data_manipulation", "scripts", "R", "text_exposure") # Using the base R function file.path
+docs_path <- here::here("04_-_data_manipulation", "doc", "text_exposure")
+data_path <- here::here("04_-_data_manipulation","data", "raw_data", "text_exposure")
+figs_path <- here::here("04_-_data_manipulation", "output")
+
+# Read in the files
+accuracy <- readr::read.csv(file = file.path(data_path,'Cleaned_211_All_accuracy.csv'))
+#data <- readr::read.csv('Cleaned_211_Correct.csv')
 
 
 data$ART_z<-as.numeric(scale(data$ART_score_value))
@@ -15,24 +28,24 @@ accuracy$RE_z<-as.numeric(scale(accuracy$RE_Score))
 
 #code the comparison contrasts by assigning dummy coding
 data$Easy_Hard<-as.numeric(with(data, ifelse(SentenceType=="Active" |SentenceType=="Passive", "-1", "1")))
-data$Easy<-as.numeric(with(data, ifelse(SentenceType=="Active", "-1", 
+data$Easy<-as.numeric(with(data, ifelse(SentenceType=="Active", "-1",
                                        ifelse(SentenceType=="Passive", "1", "0"))))
-data$Hard<-as.numeric(with(data, ifelse(SentenceType=="SRC", "-1", 
+data$Hard<-as.numeric(with(data, ifelse(SentenceType=="SRC", "-1",
                                         ifelse(SentenceType=="ORC", "1", "0"))))
 
-data$LinearTrend<-as.numeric(with(data, ifelse(SentenceType=="Active", "-3", 
-                                              ifelse(SentenceType=="Passive", "-1", 
+data$LinearTrend<-as.numeric(with(data, ifelse(SentenceType=="Active", "-3",
+                                              ifelse(SentenceType=="Passive", "-1",
                                                      ifelse(SentenceType=="SRC", "1", "3")))))
 
 
 accuracy$Easy_Hard<-as.numeric(with(accuracy, ifelse(SentenceType=="Active" |SentenceType=="Passive", "-1", "1")))
-accuracy$Easy<-as.numeric(with(accuracy, ifelse(SentenceType=="Acive", "-1", 
+accuracy$Easy<-as.numeric(with(accuracy, ifelse(SentenceType=="Acive", "-1",
                                         ifelse(SentenceType=="Passive", "1", "0"))))
-accuracy$Hard<-as.numeric(with(accuracy, ifelse(SentenceType=="SRC", "-1", 
+accuracy$Hard<-as.numeric(with(accuracy, ifelse(SentenceType=="SRC", "-1",
                                         ifelse(SentenceType=="ORC", "1", "0"))))
 
-accuracy$LinearTrend<-as.numeric(with(accuracy, ifelse(SentenceType=="Active", "-3", 
-                                               ifelse(SentenceType=="Passive", "-1", 
+accuracy$LinearTrend<-as.numeric(with(accuracy, ifelse(SentenceType=="Active", "-3",
+                                               ifelse(SentenceType=="Passive", "-1",
                                                       ifelse(SentenceType=="SRC", "1", "3")))))
 
 
@@ -40,12 +53,12 @@ accuracy$LinearTrend<-as.numeric(with(accuracy, ifelse(SentenceType=="Active", "
 
 #code exploratory treatment contrast with Active sentences set as a baseline
 
-data$Condition<-as.factor(with(data, ifelse(SentenceType=="Active", "1", 
-                                            ifelse(SentenceType=="Passive", "2", 
+data$Condition<-as.factor(with(data, ifelse(SentenceType=="Active", "1",
+                                            ifelse(SentenceType=="Passive", "2",
                                                    ifelse(SentenceType=="SRC", "3", "4")))))
 
-accuracy$Condition<-as.factor(with(accuracy, ifelse(SentenceType=="Active", "1", 
-                                            ifelse(SentenceType=="Passive", "2", 
+accuracy$Condition<-as.factor(with(accuracy, ifelse(SentenceType=="Active", "1",
+                                            ifelse(SentenceType=="Passive", "2",
                                                    ifelse(SentenceType=="SRC", "3", "4")))))
 
 
@@ -99,7 +112,7 @@ confint(ART_RE_Treatment_Three_Way_Log )
 
 anova(ART_Treatment_raw, ART_RR_Treatment_Three_Way)
 
-#Accuracy - 
+#Accuracy -
 
 ART_Orthogonal = glmer(Accuracy ~Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = accuracy, family =binomial)
 summary(ART_Orthogonal)
