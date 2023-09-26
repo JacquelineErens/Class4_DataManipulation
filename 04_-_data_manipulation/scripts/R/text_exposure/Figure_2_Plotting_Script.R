@@ -28,16 +28,18 @@ RT_accurate$ParticipantCode <- as.factor(RT_accurate$ParticipantCode)
 RT_accurate$Participant_ID  <- as.factor(RT_accurate$Participant_ID)
 
 # Step2 - add x-column for plotting
-RT_cleaned$x[RT_cleaned$SentenceType=="ORC"]      <- "4"
-RT_cleaned$x[RT_cleaned$SentenceType=="SRC"]      <- "3"
-RT_cleaned$x[RT_cleaned$SentenceType=="Passive"]  <- "2"
-RT_cleaned$x[RT_cleaned$SentenceType=="Active"]   <- "1"
-RT_cleaned$x<-as.numeric(RT_cleaned$x)
+RT_cleaned$x[RT_cleaned$SentenceType == "ORC"]      <- "4"
+RT_cleaned$x[RT_cleaned$SentenceType == "SRC"]      <- "3"
+RT_cleaned$x[RT_cleaned$SentenceType == "Passive"]  <- "2"
+RT_cleaned$x[RT_cleaned$SentenceType == "Active"]   <- "1"
 
-RT_cleaned$x[RT_cleaned$SentenceType=="ORC"]      <- "4"
-RT_cleaned$x[RT_cleaned$SentenceType=="SRC"]      <- "3"
-RT_cleaned$x[RT_cleaned$SentenceType=="Passive"]  <- "2"
-RT_cleaned$x[RT_cleaned$SentenceType=="Active"]   <- "1"
+#make the coded variables numeric to plot in 1,2,3,4 format
+RT_cleaned$x <- as.numeric(RT_cleaned$x)
+
+RT_cleaned$x[RT_cleaned$SentenceType == "ORC"]      <- "4"
+RT_cleaned$x[RT_cleaned$SentenceType == "SRC"]      <- "3"
+RT_cleaned$x[RT_cleaned$SentenceType == "Passive"]  <- "2"
+RT_cleaned$x[RT_cleaned$SentenceType == "Active"]   <- "1"
 
 # make the code numeric so that you can use it as an x axis value to plot on
 RT_cleaned$x <- as.numeric(RT_cleaned$x)
@@ -50,18 +52,28 @@ read_means_p <- RT_accurate %>%
             Mean = mean(ReadingTime_ms),
             SD   = sd(ReadingTime_ms))
 
+#calculate standard errors by taking SD and doing sqrt N
 read_means_p$se = read_means_p$SD / sqrt(read_means_p$N)
 
-read_means_p$x[read_means_p$SentenceType=="ORC"] <-"4"
-read_means_p$x[read_means_p$SentenceType=="SRC"] <-"3"
-read_means_p$x[read_means_p$SentenceType=="Passive"] <-"2"
-read_means_p$x[read_means_p$SentenceType=="Active"] <-"1"
-read_means_p$x<-as.numeric(read_means_p$x)
+read_means_p$x[read_means_p$SentenceType=="ORC"]     <- "4"
+read_means_p$x[read_means_p$SentenceType=="SRC"]     <- "3"
+read_means_p$x[read_means_p$SentenceType=="Passive"] <- "2"
+read_means_p$x[read_means_p$SentenceType=="Active"]  <- "1"
 
-read_means <- RT_accurate%>%
+#make the means numeric as that is a numeric variable
+read_means_p$x <- as.numeric(read_means_p$x)
+
+# take the reaction times of the accurate sentences?
+# then group them by type?
+#
+read_means <- RT_accurate %>%
   group_by(SentenceType)%>%
-  summarize(N=length(ReadingTime_ms),Mean=mean(ReadingTime_ms),SD = sd(ReadingTime_ms))
-read_means$se = read_means$SD/sqrt(read_means$N)
+  summarize(N=length(ReadingTime_ms),
+            Mean=mean(ReadingTime_ms),
+            SD = sd(ReadingTime_ms))
+
+
+read_means$se = read_means$SD / sqrt(read_means$N)
 read_means$x[read_means$SentenceType=="ORC"] <-"4"
 read_means$x[read_means$SentenceType=="SRC"] <-"3"
 read_means$x[read_means$SentenceType=="Passive"] <-"2"
