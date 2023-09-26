@@ -55,16 +55,17 @@ read_means_p <- RT_accurate %>%
 #calculate standard errors by taking SD and doing sqrt N
 read_means_p$se = read_means_p$SD / sqrt(read_means_p$N)
 
-read_means_p$x[read_means_p$SentenceType=="ORC"]     <- "4"
-read_means_p$x[read_means_p$SentenceType=="SRC"]     <- "3"
-read_means_p$x[read_means_p$SentenceType=="Passive"] <- "2"
-read_means_p$x[read_means_p$SentenceType=="Active"]  <- "1"
+#guessing read_means_p is participant means, and then they're doing the same transformation they did above to plot
+read_means_p$x[read_means_p$SentenceType == "ORC"]     <- "4"
+read_means_p$x[read_means_p$SentenceType == "SRC"]     <- "3"
+read_means_p$x[read_means_p$SentenceType == "Passive"] <- "2"
+read_means_p$x[read_means_p$SentenceType == "Active"]  <- "1"
 
 #make the means numeric as that is a numeric variable
 read_means_p$x <- as.numeric(read_means_p$x)
 
 # take the reaction times of the accurate sentences?
-# then group them by type?
+# then group them by type of sentence: active, passive, Subject Relative Clause, Object relative clause
 #
 read_means <- RT_accurate %>%
   group_by(SentenceType)%>%
@@ -72,23 +73,33 @@ read_means <- RT_accurate %>%
             Mean=mean(ReadingTime_ms),
             SD = sd(ReadingTime_ms))
 
-
+# calculate the standard error of the reading means, and then do the transformation to numerics for plotting
 read_means$se = read_means$SD / sqrt(read_means$N)
-read_means$x[read_means$SentenceType=="ORC"] <-"4"
-read_means$x[read_means$SentenceType=="SRC"] <-"3"
-read_means$x[read_means$SentenceType=="Passive"] <-"2"
-read_means$x[read_means$SentenceType=="Active"] <-"1"
-read_means$x<-as.numeric(read_means$x)
 
-answer_means_p <- RT_cleaned%>%
-  group_by(ParticipantCode, Participant_ID, SentenceType)%>%
-  summarise(N=length(Accuracy),Mean=mean(Accuracy),SD = sd(Accuracy))
+read_means$x[read_means$SentenceType == "ORC"]     <- "4"
+read_means$x[read_means$SentenceType == "SRC"]     <- "3"
+read_means$x[read_means$SentenceType == "Passive"] <- "2"
+read_means$x[read_means$SentenceType == "Active"]  <- "1"
+
+# change type to numeric
+read_means$x <- as.numeric(read_means$x)
+
+#unclear what the difference is between participant codes and participant ids
+answer_means_p <- RT_cleaned %>%
+  group_by(ParticipantCode, Participant_ID, SentenceType) %>%
+  summarise(N=length(Accuracy),
+            Mean=mean(Accuracy),
+            SD = sd(Accuracy))
+
+# calculate the standard error of the mean number answered correctly?
 answer_means_p$se = answer_means_p$SD/sqrt(answer_means_p$N)
 
-answer_means_p$x[answer_means_p$SentenceType=="ORC"] <-"4"
-answer_means_p$x[answer_means_p$SentenceType=="SRC"] <-"3"
-answer_means_p$x[answer_means_p$SentenceType=="Passive"] <-"2"
-answer_means_p$x[answer_means_p$SentenceType=="Active"] <-"1"
+answer_means_p$x[answer_means_p$SentenceType == "ORC"]     <-"4"
+answer_means_p$x[answer_means_p$SentenceType == "SRC"]     <-"3"
+answer_means_p$x[answer_means_p$SentenceType == "Passive"] <-"2"
+answer_means_p$x[answer_means_p$SentenceType == "Active"]  <-"1"
+
+#make numeric so you can use later in calculations
 answer_means_p$x<-as.numeric(answer_means_p$x)
 
 answer_means <- RT_cleaned%>%
