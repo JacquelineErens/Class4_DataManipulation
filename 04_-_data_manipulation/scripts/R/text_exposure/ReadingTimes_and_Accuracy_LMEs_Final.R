@@ -12,7 +12,7 @@ here_path <- here::here() # Just using here for finding root path directories. I
 ### Some of the subdirectories
 code_path <- here::here("04_-_data_manipulation", "scripts", "R", "text_exposure") # Using the base R function file.path
 docs_path <- here::here("04_-_data_manipulation", "doc", "text_exposure")
-data_path <- here::here("04_-_data_manipulation","data", "raw_data", "text_exposure")
+data_path <- here::here("04_-_data_manipulation", "data", "raw_data", "text_exposure")
 figs_path <- here::here("04_-_data_manipulation", "output")
 
 # Read in the files
