@@ -53,31 +53,35 @@ data$linear_trend <-as.numeric(with(data,
                                                  ifelse(sentence_type == "SRC", "1",
                                                         "3")))))
 
+# code active or passive sentences as -1 to compare to relative clause sentences (-1)
+accuracy %>%
+    mutate(easy_hard = ifelse((sentence_type == "Active" | sentence_type == "Passive"), "-1",
+                              "1"),
+           easy_hard = numeric(easy_hard))
 
-accuracy$easy_hard <-
-    as.numeric(with(accuracy,
-                    ifelse(sentence_type == "Active" | sentence_type == "Passive",
-                           "-1",
-                           "1")))
-accuracy$easy <-
-    as.numeric(with(accuracy,
-                    ifelse(sentence_type == "Acive", "-1",
-                           ifelse(sentence_type=="Passive", "1",
-                                  "0"))))
-accuracy$hard <- as.numeric(with(accuracy,
-                                 ifelse(sentence_type == "SRC", "-1",
-                                        ifelse(sentence_type == "ORC", "1",
-                                               "0"))))
-accuracy$linear_trend <-
+
+# re-code the easy sentences (just the actives and the passives)
+accuracy %>%
+    mutate(easy = ifelse(sentence_type == "Active", "-1",
+                         ifelse(sentence_type == "Passive", "1",
+                                "0")),
+           easy = numeric(easy))
+
+# re-code the hard sentences (the relative clause sentences - SRC and ORC)
+accuracy %>%
+    mutate(hard = ifelse(sentence_type == "SRC", "-1",
+                         ifelse(sentence_type == "ORC", "1",
+                                "0")),
+           hard = numeric(hard))
+
+# looks to be some sort of contrast coding scheme?
+# moving to dplyr's mutate function to assign codes and also reassign to numeric
+accuracy %>%
     mutate(sentence_type = ifelse('Active', -3,
                                   ifelse('Passive', -1,
                                          ifelse('SRC', 1,
-                                                3))))
-    as.numeric(with(accuracy,
-                    ifelse(sentence_type == "Active", "-3",
-                           ifelse(sentence_type == "Passive", "-1",
-                                  ifelse(sentence_type =="SRC", "1",
-                                         "3")))))
+                                                3))),
+           sentence_type = numeric(sentence_type))
 
 
 # code exploratory treatment contrast with Active sentences set as a baseline
