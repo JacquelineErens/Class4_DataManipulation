@@ -13,11 +13,11 @@ h = 7
 getwd()
 
 # set working directory
-setwd("./04_-_data_manipulation/data/raw_data/text_exposure")
+setwd("./04_-_data_manipulation")
 
 # Step1 - load in the data
-RT_accurate <- read.csv("Cleaned_211_Correct.csv")
-RT_cleaned  <-read.csv("Cleaned_211_All_accuracy.csv")
+RT_accurate <- read.csv("/data/raw_data/text_exposure/Cleaned_211_Correct.csv")
+RT_cleaned  <-read.csv("/data/raw_data/text_exposure/Cleaned_211_All_accuracy.csv")
 
 # look at the structure of the data
 str(RT_accurate)
@@ -102,54 +102,77 @@ answer_means_p$x[answer_means_p$SentenceType == "Active"]  <-"1"
 #make numeric so you can use later in calculations
 answer_means_p$x<-as.numeric(answer_means_p$x)
 
+#mean reaction time grouped by sentence type
 answer_means <- RT_cleaned%>%
   group_by(SentenceType)%>%
-  summarize(N=length(Accuracy),Mean=mean(Accuracy),SD = sd(Accuracy))
+  summarize(N=length(Accuracy),
+            Mean=mean(Accuracy),
+            SD = sd(Accuracy))
+
+# calculate standard error of the mean reaction time
 answer_means$se = answer_means$SD/sqrt(answer_means$N)
-answer_means$x[answer_means$SentenceType=="ORC"] <-"4"
-answer_means$x[answer_means$SentenceType=="SRC"] <-"3"
-answer_means$x[answer_means$SentenceType=="Passive"] <-"2"
-answer_means$x[answer_means$SentenceType=="Active"] <-"1"
+
+# numeric coding for plotting, again
+answer_means$x[answer_means$SentenceType == "ORC"]     <- "4"
+answer_means$x[answer_means$SentenceType == "SRC"]     <- "3"
+answer_means$x[answer_means$SentenceType == "Passive"] <- "2"
+answer_means$x[answer_means$SentenceType == "Active"]  <- "1"
+
+# make the mean a numeric variable to use in numeric stuff
 answer_means$x<-as.numeric(answer_means$x)
 
+# write the data to a file, but they have it commented out so maybe don't
 # write.csv(answer_means_p, "Accuracy_proportions_211.csv")
 
 #Step4 - Visualize the 3 measures: reading and response times and accuracy
 
 #add some jitter to avoid the datapoint overlap
 set.seed (321)
-RT_accurate$xj<-jitter(RT_accurate$x, amount = .09)
-read_means_p$xj<-jitter(read_means_p$x, amount = .09)
-read_means$xj<-jitter(read_means$x, amount = .09)
 
-answer_means_p$xj<-jitter(answer_means_p$x, amount = .09)
-answer_means$xj<-jitter(answer_means$x, amount = .09)
+# adding jitter here instead of in the plots, okay
+RT_accurate$xj  <- jitter(RT_accurate$x, amount = .09)
+read_means_p$xj <- jitter(read_means_p$x, amount = .09)
+read_means$xj   <- jitter(read_means$x, amount = .09)
+
+answer_means_p$xj <- jitter(answer_means_p$x, amount = .09)
+answer_means$xj   <- jitter(answer_means$x, amount = .09)
 
 ##Plot rt by condition
 
-F1_response<-ggplot(read_means_p, aes(y=Mean))+
+# our lab really loves our raincloud plots
+
+F1_response <- ggplot(read_means_p, aes(y=Mean))+
+
   #Add geom_() objects
+
+  #the points
   geom_point(data = read_means_p %>% filter(x=="1"), aes(x=xj), color = 'dodgerblue', size = 1.5, alpha = .4)+
   geom_point(data = read_means_p %>% filter(x=="2"), aes(x=xj), color = 'darkgreen', size = 1.5, alpha = .4)+
   geom_point(data = read_means_p %>% filter(x=="3"), aes(x=xj), color = 'darkorange', size = 1.5, alpha = .4)+
   geom_point(data = read_means_p %>% filter(x=="4"), aes(x=xj), color = 'red', size = 1.5, alpha = .4)+
 
+  #the line
   geom_line(aes(x=xj, group=ParticipantCode), color = 'lightgrey', alpha=.4)+
 
+  #the boxplot
   geom_half_boxplot(data = read_means_p %>% filter(x=="1"), aes(x=x), position = position_nudge(x=-.1),side = "r", outlier.shape = NA, center=TRUE, errorbar.draw = TRUE, width = .5, fill = 'dodgerblue', alpha = .1)+
   geom_half_boxplot(data = read_means_p %>% filter(x=="2"), aes(x=x), position = position_nudge(x=-.1),side = "r", outlier.shape = NA, center=TRUE, errorbar.draw = TRUE, width = .5, fill = 'darkgreen', alpha = .1)+
   geom_half_boxplot(data = read_means_p %>% filter(x=="3"), aes(x=x), position = position_nudge(x=-.1),side = "r", outlier.shape = NA, center=TRUE, errorbar.draw = TRUE, width = .5, fill = 'darkorange', alpha = .1)+
   geom_half_boxplot(data = read_means_p %>% filter(x=="4"), aes(x=x), position = position_nudge(x=-.1),side = "r", outlier.shape = NA, center=TRUE, errorbar.draw = TRUE, width = .5, fill = 'red', alpha = .1)+
 
+  # and yet another way to do the half violin
   geom_half_violin(data = read_means_p %>% filter(x=="4"), aes(x=x), position = position_nudge(x=-0.2), side = "l", fill='red', color='red', alpha=.3, trim=TRUE )+
   geom_half_violin(data = read_means_p %>% filter(x=="3"), aes(x=x), position = position_nudge(x=-0.2), side = "l", fill='darkorange', color='darkorange', alpha=.3, trim=TRUE )+
   geom_half_violin(data = read_means_p %>% filter(x=="2"), aes(x=x), position = position_nudge(x=-0.2), side = "l", fill='darkgreen', color='darkgreen', alpha=.3, trim=TRUE )+
   geom_half_violin(data = read_means_p %>% filter(x=="1"), aes(x=x), position = position_nudge(x=-0.2), side = "l", fill='dodgerblue', color='dodgerblue', alpha=.3, trim=TRUE )+
 
+  #points again?
   geom_point(data = read_means %>% filter(x=="1"), aes(x = x, y=Mean), position = position_nudge(0.03), color = 'black', size = 2)+
   geom_point(data = read_means %>% filter(x=="2"), aes(x = x, y=Mean), position = position_nudge(0.03), color = 'black', size = 2)+
   geom_point(data = read_means %>% filter(x=="3"), aes(x = x, y=Mean), position = position_nudge(0.03), color = 'black', size = 2)+
   geom_point(data = read_means %>% filter(x=="4"), aes(x = x, y=Mean), position = position_nudge(0.03), color = 'black', size = 2)+
+
+  # add error bars
   geom_errorbar(data =read_means %>% filter(x=="1"), aes(x=x, y=Mean, ymin = Mean-se, ymax = Mean+se), position = position_nudge(0.03), color = "black", width = .05, size = .5)+
   geom_errorbar(data =read_means %>% filter(x=="2"), aes(x=x, y=Mean, ymin = Mean-se, ymax = Mean+se), position = position_nudge(0.03), color = "black", width = .05, size = .5)+
   geom_errorbar(data =read_means %>% filter(x=="3"), aes(x=x, y=Mean, ymin = Mean-se, ymax = Mean+se), position = position_nudge(0.03), color = "black", width = .05, size = .5)+
@@ -213,7 +236,7 @@ F1_accuracy<-ggplot(answer_means_p, aes(y=Mean))+
         legend.title = element_text(color = "black", face="bold", size=16),
         legend.text = element_text(color = "black", size=16))
 F1_accuracy
-ggsave(path="/Users/astoops/Documents/Self_Paced_Reading/Plots", filename = "F1 Accuracy by Participant and Condition with Density Plots.png", plot=F1_accuracy, width=w, height = h)
+ggsave(path="Plots", filename = "F1 Accuracy by Participant and Condition with Density Plots.png", plot=F1_accuracy, width=w, height = h)
 
 
 

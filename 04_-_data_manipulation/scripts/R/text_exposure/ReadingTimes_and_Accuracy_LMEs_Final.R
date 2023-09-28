@@ -69,6 +69,10 @@ accuracy$hard <- as.numeric(with(accuracy,
                                         ifelse(sentence_type == "ORC", "1",
                                                "0"))))
 accuracy$linear_trend <-
+    mutate(sentence_type = ifelse('Active', -3,
+                                  ifelse('Passive', -1,
+                                         ifelse('SRC', 1,
+                                                3))))
     as.numeric(with(accuracy,
                     ifelse(sentence_type == "Active", "-3",
                            ifelse(sentence_type == "Passive", "-1",
@@ -76,24 +80,29 @@ accuracy$linear_trend <-
                                          "3")))))
 
 
-#code exploratory treatment contrast with Active sentences set as a baseline
-
-data$condition <- as.factor(with(data,
-                                 ifelse(sentence_type == "Active", "1",
-                                        ifelse(sentence_type == "Passive", "2",
-                                               ifelse(sentence_type =="SRC", "3",
-                                                      "4")))))
-
-accuracy$condition <-
-    as.factor(with(accuracy,
-                   ifelse(sentence_type == "Active", "1",
-                          ifelse(sentence_type == "Passive", "2",
-                                 ifelse(sentence_type == "SRC", "3",
-                                        "4")))))
+# code exploratory treatment contrast with Active sentences set as a baseline
+# following suggestions in https://stackoverflow.com/questions/24459752/can-dplyr-package-be-used-for-conditional-mutating
+data$condition <- condition %>%
+    mutate(sentence_type = ifelse('Active', 1,
+                                   ifelse('Passive', 2,
+                                          ifelse('SRC', 3,
+                                                 4)
+                                          )
+                                  ),
+           sentence_type = factor(sentence_type)
+           )
 
 
-data$sentence_type <- as.factor(data$sentence_type)
-accuracy$sentence_type <- as.factor(accuracy$sentence_type)
+accuracy$condition <- accuracy %>%
+    mutate(sentence_type == ifelse('Active', 1,
+                                  ifelse('Passive', 2,
+                                         ifelse('SRC', 3,
+                                                4)
+                                         )
+                                  ),
+           sentence_type = factor(sentence_type)
+           )
+
 
 
 
