@@ -34,77 +34,78 @@ accuracy$art_z <- as.numeric(scale(accuracy$art_score_value))
 accuracy$re_z <- as.numeric(scale(accuracy$re_score))
 
 #code the comparison contrasts by assigning dummy coding
-data$easy_hard <- as.numeric(with(data,
-                                  ifelse(sentence_type == "Active" | SentenceType == "Passive",
-                                         "-1",
-                                         "1")))
-data$easy <- as.numeric(with(data,
-                             ifelse(sentence_type == "Active", "-1",
-                                    ifelse(sentence_type == "Passive", "1",
-                                           "0"))))
-data$hard <-as.numeric(with(data,
-                           ifelse(sentence_type == "SRC", "-1",
-                                  ifelse(sentence_type == "ORC", "1",
-                                         "0"))))
 
-data$linear_trend <-as.numeric(with(data,
-                                   ifelse(sentence_type == "Active", "-3",
-                                          ifelse(sentence_type == "Passive", "-1",
-                                                 ifelse(sentence_type == "SRC", "1",
-                                                        "3")))))
+data %>%
+    mutate(easy_hard = ifelse(sentence_type == "Active", -1,
+                         ifelse(sentence_type == "Passive", -1,
+                                1)))
+
+
+data %>%
+    mutate(easy = ifelse(sentence_type == "Active", -1,
+                         ifelse(sentence_type == "Passive", 1,
+                                0)))
+
+data %>%
+    mutate(hard = ifelse(sentence_type == "SRC", -1,
+                                 ifelse(sentence_type == "ORC", 1,
+                                        0)))
+
+data %>%
+    mutate(linear_trend = ifelse(sentence_type == "Active", -3,
+                                 ifelse(sentence_type == "Passive", -1,
+                                        ifelse(sentence_type == "SRC", 1,
+                                               3))))
 
 # code active or passive sentences as -1 to compare to relative clause sentences (-1)
 accuracy %>%
-    mutate(easy_hard = ifelse((sentence_type == "Active" | sentence_type == "Passive"), "-1",
-                              "1"),
-           easy_hard = numeric(easy_hard))
+    mutate(easy_hard = ifelse((sentence_type == "Active" |
+                                   sentence_type == "Passive"), -1,
+                              1))
 
 
 # re-code the easy sentences (just the actives and the passives)
 accuracy %>%
-    mutate(easy = ifelse(sentence_type == "Active", "-1",
-                         ifelse(sentence_type == "Passive", "1",
-                                "0")),
-           easy = numeric(easy))
+    mutate(easy = ifelse(sentence_type == "Active", -1,
+                         ifelse(sentence_type == "Passive", 1,
+                                0)))
 
 # re-code the hard sentences (the relative clause sentences - SRC and ORC)
 accuracy %>%
-    mutate(hard = ifelse(sentence_type == "SRC", "-1",
-                         ifelse(sentence_type == "ORC", "1",
-                                "0")),
-           hard = numeric(hard))
+    mutate(hard = ifelse(sentence_type == "SRC", -1,
+                         ifelse(sentence_type == "ORC", 1,
+                                0)))
 
 # looks to be some sort of contrast coding scheme?
 # moving to dplyr's mutate function to assign codes and also reassign to numeric
 accuracy %>%
-    mutate(sentence_type = ifelse('Active', -3,
-                                  ifelse('Passive', -1,
-                                         ifelse('SRC', 1,
-                                                3))),
-           sentence_type = numeric(sentence_type))
+    mutate(linear_trend = ifelse(sentence_type == "Active", -3,
+                                 ifelse(sentence_type == "Passive", -1,
+                                        ifelse(sentence_type == "SRC", 1,
+                                               3))))
 
 
 # code exploratory treatment contrast with Active sentences set as a baseline
 # following suggestions in https://stackoverflow.com/questions/24459752/can-dplyr-package-be-used-for-conditional-mutating
-data$condition <- condition %>%
-    mutate(sentence_type = ifelse('Active', 1,
+data %>%
+    mutate(condition = ifelse('Active', 1,
                                    ifelse('Passive', 2,
                                           ifelse('SRC', 3,
                                                  4)
                                           )
                                   ),
-           sentence_type = factor(sentence_type)
+           condition = factor(condition)
            )
 
 
-accuracy$condition <- accuracy %>%
-    mutate(sentence_type == ifelse('Active', 1,
+accuracy %>%
+    mutate(condition == ifelse('Active', 1,
                                   ifelse('Passive', 2,
                                          ifelse('SRC', 3,
                                                 4)
                                          )
                                   ),
-           sentence_type = factor(sentence_type)
+           condition = factor(condition)
            )
 
 
