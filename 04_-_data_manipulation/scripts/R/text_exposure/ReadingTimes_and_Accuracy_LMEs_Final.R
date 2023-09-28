@@ -53,7 +53,6 @@ data$linear_trend <-as.numeric(with(data,
                                                  ifelse(sentence_type == "SRC", "1",
                                                         "3")))))
 
-
 accuracy$easy_hard <-
     as.numeric(with(accuracy,
                     ifelse(sentence_type == "Active" | sentence_type == "Passive",
@@ -100,84 +99,144 @@ accuracy$sentence_type <- as.factor(accuracy$sentence_type)
 
 #Response time raw and log transformed vs ART and RE in separate models
 
-art_orthogonal <- glmer(ReadingTime_ms ~ easy_hard * art_z + easy*ART_z+ hard * art_z + (1 | ItemType) + (1 | ParticipantCode), data = data)
+art_orthogonal <-
+    glmer(reading_time_ms ~ easy_hard * art_z + easy * art_z + hard * art_z +
+              (1 | item_type) + (1 | participant_code),
+          data = data)
 summary(art_orthogonal)
-art_orthogonal_log <- lmer(Reading_Time_Log ~SES_factor+ Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = data)
+
+art_orthogonal_log <-
+    lmer(reading_time_log ~ ses_factor + easy_hard * art_z + easy * art_z + hard * art_z +
+             (1 | item_type) + (1 | participant_code),
+         data = data)
 summary(art_orthogonal_log)
 
 
-RE_Orthogonal <- lmer(ReadingTime_ms ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(RE_Orthogonal)
-RE_Orthogonal_Log <- lmer(Reading_Time_Log ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(RE_Orthogonal_Log)
+re_orthogonal <- lmer(reading_time_ms ~ easy_hard * re_z + easy * re_z + hard * re_z +
+                          (1 | item_type) + (1 | participant_code),
+                      data = data)
+summary(re_orthogonal)
+
+re_orthogonal_log <-
+    lmer(reading_time_log ~ easy_hard * re_z + easy * re_z + hard * re_z +
+             (1 | item_type) + (1 | participant_Code),
+         data = data)
+summary(re_orthogonal_log)
 
 
 #both ART and RE in one model
-ART_RE_Orthogonal_Three_Way = lmer(ReadingTime_ms ~Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_RE_Orthogonal_Three_Way)
+art_re_orthogonal_three_way <-
+    lmer(reading_time_ms ~ easy_hard * art_z + easy * art_z + hard * art_z +
+             easy_hard * re_z + easy * re_z + hard * re_z +
+             (1 | item_type) + (1 | participant_code),
+         data = data)
+summary(art_re_orthogonal_three_way)
 
 
-ART_RE_Orthogonal_Three_Way_Log = lmer(Reading_Time_Log ~Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_RE_Orthogonal_Three_Way_Log)
-
-
+art_re_orthogonal_three_way_log <-
+    lmer(reading_time_log ~ easy_hard * art_z + easy * art_z+ hard * art_z +
+             easy_hard * re_z + easy * re_z + hard * re_z +(1 | item_type) +
+             (1 | participant_code),
+         data = data)
+summary(art_re_orthogonal_three_way_log)
 
 #exploratory  analyses - treatment contrast
-ART_Treatment_raw = lmer(ReadingTime_ms ~Condition*ART_z*SES_factor+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_Treatment_raw)
-ART_Treatment_Log= lmer(Reading_Time_Log ~Condition*ART_z*SES_factor+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_Treatment_Log)
+art_treatment_raw <- lmer(reading_time_ms ~ condition * art_z * ses_factor +
+                              (1 | item_type) + (1 | participant_code),
+                          data = data)
+summary(art_treatment_raw)
 
-RE_Treatment_raw = lmer(ReadingTime_ms ~Condition*RE_z*SES_factor+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(RE_Treatment_raw)
-RE_Treatment_Log= lmer(Reading_Time_Log ~Condition*RE_z*SES_factor+(1|ItemType) + (1|ParticipantCode), data =data)
-summary(RE_Treatment_Log)
+art_treatment_log <- lmer(reading_time_log ~ condition * art_z * ses_factor +
+                              (1 | item_type) + (1 | participant_code),
+                          data = data)
+summary(art_treatment_log)
 
-ART_RE_Treatment_Three_Way = lmer(ReadingTime_ms ~Condition*ART_z+Condition*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_RE_Treatment_Three_Way)
-confint(ART_RE_Treatment_Three_Way)
-ART_RE_Treatment_Three_Way_Log = lmer(Reading_Time_Log ~Condition*ART_z+Condition*RE_z+(1|ItemType) + (1|ParticipantCode), data = data)
-summary(ART_RE_Treatment_Three_Way_Log )
-confint(ART_RE_Treatment_Three_Way_Log )
+re_treatment_raw <- lmer(reading_time_ms ~ condition * re_z * ses_factor +
+                             (1 | item_type) + (1 | participant_code),
+                         data = data)
+summary(re_treatment_raw)
+re_treatment_log <- lmer(reading_time_log ~ condition * re_z * ses_factor +
+                             (1 | item_type) + (1 | participant_code),
+                         data =data)
+summary(re_treatment_log)
 
-anova(ART_Treatment_raw, ART_RR_Treatment_Three_Way)
+art_re_treatment_three_way <-
+    lmer(reading_time_ms ~ condition * art_z + condition * re_z +
+             (1 | item_type) + (1 | participant_code), data = data)
+summary(art_re_treatment_three_way)
+confint(art_re_treatment_three_way)
+
+art_re_treatment_three_way_log <-
+    lmer(reading_time_log ~ condition * art_z + condition * re_z +
+             (1 | item_type) + (1 | participant_code),
+         data = data)
+summary(art_re_treatment_three_way_log)
+confint(art_re_treatment_three_way_log)
+
+anova(art_treatment_raw, art_re_treatment_three_way)
 
 #Accuracy -
 
-ART_Orthogonal = glmer(Accuracy ~Easy_Hard*ART_z+ Easy*ART_z+ Hard*ART_z+(1|ItemType) + (1|ParticipantCode), data = accuracy, family =binomial)
-summary(ART_Orthogonal)
-confint(ART_Orthogonal)
+art_orthogonal <-
+    glmer(accuracy ~ easy_hard * art_ z + easy * art_z + hard * art_z +
+              (1 | item_type) + (1 | participant_code),
+          data = accuracy,
+          family = binomial)
+summary(art_orthogonal)
+confint(art_orthogonal)
 
-RE_Orthogonal = glmer(Accuracy ~Easy_Hard*RE_z+ Easy*RE_z+ Hard*RE_z+(1|ItemType) + (1|ParticipantCode), data = accuracy, family =binomial)
-summary(RE_Orthogonal)
-confint(RE_Orthogonal)
+re_orthogonal <-
+    glmer(accuracy ~ easy_hard * re_z + easy * re_z + hard * re_z +
+              (1 | item_type) + (1 | participant_code),
+          data = accuracy,
+          family = binomial)
+summary(re_orthogonal)
+confint(re_orthogonal)
 
-ART_Treatment_Accuracy = glmer(Accuracy ~Condition*ART_z*SES_factor+(1|ItemType)+ (1|ParticipantCode), data = accuracy, family =binomial)
-summary(ART_Treatment_Accuracy)
+art_treatment_accuracy <-
+    glmer(accuracy ~ condition * art_z * ses_factor + (1 | item_type) + (1 | participant_code),
+          data = accuracy,
+          family = binomial)
+summary(art_treatment_accuracy)
 
-RE_Treatment_Accuracy = glmer(Accuracy ~Condition*RE_z*SES_factor +(1|ItemType)+ (1|ParticipantCode), data = accuracy, family =binomial)
-summary(RE_Treatment_Accuracy)
+re_treatment_accuracy <-
+    glmer(accuracy ~ condition * re_z * ses_factor + (1 | item_type) + (1 | participant_code),
+          data = accuracy,
+          family = binomial)
+summary(re_treatment_accuracy)
 
 
-ART_RE_Orthogonal_Three_Way = glmer(Accuracy ~Easy_Hard*ART_z + Easy*ART_z + Hard*ART_z+Easy_Hard*RE_z + Easy*RE_z + Hard*RE_z+(1|ItemType), data = accuracy, family =binomial)
-summary(ART_RE_Orthogonal_Three_Way)
-confint(ART_RE_Orthogonal_Three_Way)
+art_re_orthogonal_three_way <-
+    glmer(accuracy ~ easy_hard * art_z + easy * art_z + hard * art_z +
+              easy_hard * re_z + easy * re_z + hard * re_z + (1 | item_type),
+          data = accuracy,
+          family = binomial)
+summary(art_re_orthogonal_three_way)
+confint(art_re_orthogonal_three_way)
 
-ART_RE_Treatment_Three_Way = glmer(Accuracy ~Condition*ART_z + Condition*RE_z +(1|ItemType), data = accuracy, family =binomial)
-summary(ART_RE_Treatment_Three_Way)
-confint(ART_RE_Orthogonal_Three_Way)
+art_re_treatment_three_way <-
+    glmer(accuracy ~ condition * art_z + condition * re_z + (1 | item_type),
+          data = accuracy,
+          family = binomial)
+summary(art_re_treatment_three_way)
+confint(art_re_treatment_three_way)
 
-anova(ART_Treatment_Accuracy, ART_RE_Treatment_Three_Way)
+anova(art_treatment_accuracy, art_re_treatment_three_way)
 
-ART_RE_Orthogonal_Three_Way_lm = lm(Accuracy ~Easy_Hard*ART_z*RE_z + Easy*ART_z*RE_z + Hard*ART_z*RE_z, data = accuracy)
-summary(ART_RE_Orthogonal_Three_Way_lm)
-confint(ART_RE_Orthogonal_Three_Way_lm)
+art_re_orthogonal_three_way_lm <-
+    lm(accuracy ~ easy_hard * art_z * re_z + easy * art_z * re_z + hard * art_z * re_z,
+       data = accuracy)
+summary(art_re_orthogonal_three_way_lm)
+confint(art_re_orthogonal_three_way_lm)
 
-ART_RE_Treatment_Three_Way_lm = lm(Accuracy ~Condition*ART_z+Condition*RE_z, data = accuracy)
-summary(ART_RE_Treatment_Three_Way_lm)
+art_re_treatment_three_way_lm <-
+    lm(accuracy ~ condition * art_z + condition * re_z,
+       data = accuracy)
+summary(art_re_treatment_three_way_lm)
 
-RE_Treatment_lm = lm(Accuracy ~Condition*RE_z, data = accuracy)
-summary(RE_Treatment_lm)
+re_treatment_lm <- lm(accuracy ~ condition * re_z,
+                      data = accuracy)
+summary(re_treatment_lm)
 
 
 
